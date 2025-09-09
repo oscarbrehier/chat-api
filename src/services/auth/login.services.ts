@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../../prisma/client";
+import { NotFoundError, UnauthorizedError } from "../../utils/errors";
 
 export async function login(email: string, password: string) {
 
@@ -12,13 +13,15 @@ export async function login(email: string, password: string) {
 			}
 		});
 
-		if (!user) throw new Error("User not found");
+		if (!user) throw new NotFoundError("User not found");
 
-		const passwordMatch = bcrypt.compare(user.password, password);
 
-		if (!passwordMatch) throw new Error("Invalid password");
+		const passwordMatch = await bcrypt.compare(password, user.password);
 
-		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+		if (!passwordMatch) throw new UnauthorizedError("Invalid password");
+
+
+		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'test-secret', { expiresIn: '1h' });
 
 		return {
 			user, token

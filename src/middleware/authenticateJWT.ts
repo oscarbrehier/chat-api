@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload, type Secret } from "jsonwebtoken";
 import prisma from "../prisma/client";
 import { User } from "../generated/prisma";
 
@@ -24,11 +24,13 @@ export async function authenticateJWT(req: Request, res: Response, next: NextFun
 		return res.status(400).json({ message: "Malformed Authorization header" });
 	}
 
-	const token = parts[1];
+	const token: string = parts[1] as string;
+	const secret: Secret = (process.env.JWT_SECRET ?? "test-secret") as Secret;
 
 	try {
 
-		const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
+		const decoded = jwt.verify(token, secret) as JwtPayload & { userId?: string };
+		if (!decoded?.userId) return res.status(403).json({ message: "Invalid or expired token" });
 		const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
 		if (!user) return res.status(401).json({ message: "User not found" });
 

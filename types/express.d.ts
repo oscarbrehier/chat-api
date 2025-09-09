@@ -1,10 +1,9 @@
-// types/express.d.ts
-import { User as PrismaUser } from "../src/generated/prisma";
+import { SafeUser } from "./user";
 
 declare global {
 	namespace Express {
 		interface Request {
-			user?: Omit<User, "password">;
+			user?: SafeUser;
 		}
 	}
 }

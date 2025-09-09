@@ -14,8 +14,6 @@ export async function register(email: string, name: string, password: string) {
 			}
 		});
 
-		console.log(user)
-
 		return (user);
 
 	} catch (err) {

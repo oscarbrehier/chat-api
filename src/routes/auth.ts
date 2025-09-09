@@ -7,9 +7,5 @@ const router: Router = Router();
 
 router.post("/signup", signUpController);
 router.post("/login", loginController);
-router.get("/test", authenticateJWT, (req, res) => {
-	console.log(req.user);
-	res.send(200);
-});
 
 export default router;
