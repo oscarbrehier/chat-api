@@ -16,10 +16,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (authToken) {
 
-        isValidToken = await validateToken(authToken);
-        if (!isValidToken) {
+        const { valid, payload } = await validateToken(authToken);
+
+        isValidToken = valid;
+
+        if (!valid) {
             context.cookies.delete("token");
-        };
+        } else {
+            context.locals.user = payload;
+        }
 
     }
     
