@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Button from "../components/starwind/button/index";
+import Input from "../components/starwind/input/index";
+---
+
+<Layout>
+	<div class="min-h-screen bg-white flex items-center justify-center px-4">
+		<div class="h-full w-full max-w-md space-y-4">
+
+			<p class="text-3xl capitalize">sign up</p>
+
+			<div class="space-y-2 w-full">
+
+				<Input class="placeholder:capitalize" type="text" id="name" placeholder="name" />
+				<Input class="placeholder:capitalize" type="email" id="email" placeholder="email" />
+				<Input class="placeholder:capitalize" type="password" id="password" placeholder="password" />
+
+				<div id="error-message" class="text-red-500 text-sm hidden" />
+
+				<Button id="signup-btn" class="w-full bg-stone-800 capitalize">sign up</Button>
+
+			</div>
+
+			<p class="text-stone-700">Already have an account? <a href="/login" class="underline text-black capitalize">login</a></p>
+
+		</div>
+	</div>
+</Layout>
+
+<script>
+
+	import { actions } from "astro:actions";
+
+	const errorDiv = document.getElementById("error-message");
+
+    function showError(message: string) {
+
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove("hidden");
+        };
+
+    };
+
+	const signUpBtn = document.getElementById("signup-btn");
+
+	signUpBtn?.addEventListener("click", async () => {
+
+		const name = (document.getElementById("name") as any).value;
+		const email = (document.getElementById("email") as any).value;
+		const password = (document.getElementById("password") as any).value;
+		
+		try {
+		
+			const { data, error: actionError } = await actions.signUp({ name, email, password });
+
+			if (data?.error || actionError) {
+				showError(data?.error || "An unexpected error occurred");
+				return ;
+			}
+
+			window.location.href = "/";
+		
+		} catch (err) {
+		
+			showError("An unexpected error occurred");
+		
+		};
+
+	});
+
+</script>

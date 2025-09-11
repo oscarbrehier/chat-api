@@ -15,13 +15,11 @@ export async function login(email: string, password: string) {
 
 		if (!user) throw new NotFoundError("User not found");
 
-
 		const passwordMatch = await bcrypt.compare(password, user.password);
 
 		if (!passwordMatch) throw new UnauthorizedError("Invalid password");
 
-
-		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'test-secret', { expiresIn: '1h' });
+		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
 		return {
 			user, token

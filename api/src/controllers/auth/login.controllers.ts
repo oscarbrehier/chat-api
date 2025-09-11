@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { login } from "../../services/auth/login.services";
 
-export async function loginController(req: Request, res: Response) {
+export async function loginController(req: Request, res: Response, next: NextFunction) {
 
 	try {
 
@@ -11,9 +11,7 @@ export async function loginController(req: Request, res: Response) {
 		res.status(200).json(result);
 
 	} catch (err: any) {
-
-		res.status(400).json({ message: err.message });
-
+		next(err);
 	};
 
 };

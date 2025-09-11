@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../../prisma/client";
+import jwt from "jsonwebtoken";
 
 export async function register(email: string, name: string, password: string) {
 
@@ -14,7 +15,12 @@ export async function register(email: string, name: string, password: string) {
 			}
 		});
 
-		return (user);
+		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+
+		return {
+			user,
+			token
+		};
 
 	} catch (err) {
 
