@@ -20,7 +20,7 @@ export async function validateToken(token: string): Promise<{ valid: boolean, pa
 		const secret = await getSecretKey();
 		const { payload } = await jwtVerify(token, secret, {
 			algorithms: ["HS256"]
-		});
+		});	
 
 		return {
 			valid: true,

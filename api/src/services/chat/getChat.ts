@@ -7,8 +7,18 @@ export async function getChat(chatId: string) {
 		where: {
 			id: chatId
 		},
-		include: {
-			users: true
+		select: {
+			id: true,
+			name: true,
+			createdAt: true,
+			users: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					createdAt: true
+				}
+			}
 		}
 	});
 
