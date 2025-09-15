@@ -5,11 +5,11 @@ export async function createChatController(req: Request, res: Response, next: Ne
 
 	try {
 		
-		const { name } = req.body;
+		const { name, ...options } = req.body;
 
 		if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
-		const chat = await createChat(name, req.user.id);
+		const chat = await createChat(name, req.user.id, options);
 
 		res.status(201).json(chat);
 

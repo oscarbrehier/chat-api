@@ -31,6 +31,7 @@ model Chat {
   name      String?
   users     User[]    @relation("UserChats")
   messages  Message[]
+  type      String    @default("dm")
   createdAt DateTime  @default(now())
 }
 

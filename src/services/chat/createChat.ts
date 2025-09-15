@@ -1,15 +1,33 @@
+import { SafeUser } from "../../../types/user";
 import prisma from "../../prisma/client";
 import { BadRequestError } from "../../utils/errors";
 
-export async function createChat(name: string, userId: string) {
+type ChatOptions = {
+	users?: SafeUser[];
+	type?: "dm" | "group";
+};
 
-	if (!name || !name.trim()) throw new BadRequestError("Chat name cannot be empty");
+export async function createChat(
+	name: string, 
+	userId: string, 
+	options: ChatOptions = {}
+) {
+
+	let userIdList = [{
+		id: userId
+	}];
+
+	if (options?.users?.length) {
+		const additionalUsers = options.users.map(user => ({ id: user.id }));
+    	userIdList.push(...additionalUsers);
+	};
 
 	const chat = await prisma.chat.create({
 		data: {
-			name,
+			...(name && { name: name.trim() }),
+			...(options?.type && { type: options.type }),
 			users: {
-				connect: [{ id: userId }]
+				connect: userIdList
 			}
 		}
 	});

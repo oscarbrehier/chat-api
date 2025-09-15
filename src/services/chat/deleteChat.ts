@@ -6,8 +6,14 @@ export async function deleteChat(chatId: string) {
 
 	try {
 
-		if (!chatId) throw new BadRequestError("Chat ID is required")
-	
+		if (!chatId) throw new BadRequestError("Chat ID is required");
+
+		await prisma.message.deleteMany({
+			where: {
+				chatId: chatId,
+			},
+		});
+
 		const deletedChat = await prisma.chat.delete({
 			where: {
 				id: chatId
@@ -23,7 +29,7 @@ export async function deleteChat(chatId: string) {
 		};
 
 		throw (error);
-	
+
 	};
 
 };

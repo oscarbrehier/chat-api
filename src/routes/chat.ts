@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateJWT } from "../middleware/authenticateJWT";
-import { createChatController } from "../controllers/chat/create.controllers";
+import { createChatController } from "../controllers/chat/createChat.controllers";
 import { getUserChatsController } from "../controllers/chat/getUserChats.controllers";
 import { updateChatController } from "../controllers/chat/updateChat.controllers";
 import { getChatController } from "../controllers/chat/getChat.controllers";
