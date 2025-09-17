@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getExistingDMController } from "../controllers/chat/getExistingDM.controllers";
+import { getExistingDMController } from "../controllers/dm/getExistingDM.controllers";
 import { authenticateJWT } from "../middleware/authenticateJWT";
 
 const router = Router();

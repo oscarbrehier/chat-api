@@ -6,7 +6,6 @@ import { updateChatController } from "../controllers/chat/updateChat.controllers
 import { getChatController } from "../controllers/chat/getChat.controllers";
 import { deleteChatController } from "../controllers/chat/deleteChat.controllers";
 import { addUserController } from "../controllers/chat/addUser.controllers";
-import { getExistingDMController } from "../controllers/chat/getExistingDM.controllers";
 
 const router = Router();
 
