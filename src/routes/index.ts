@@ -1,14 +1,23 @@
 import { Router } from "express";
-import authRoutes from "./auth";
-import chatRoutes from "./chat";
-import messageRouter from "./messages";
-import usersRouter from "./users";
+import fs from "fs";
+import path from "path";
 
 const router = Router();
+const routesDir = __dirname;
 
-router.use("/auth", authRoutes);
-router.use("/chats", chatRoutes);
-router.use("/messages", messageRouter);
-router.use("/users", usersRouter);
+fs.readdirSync(routesDir).forEach((file) => {
+
+	if (file.startsWith("index.")) return;
+	if (!file.endsWith(".ts") && !file.endsWith(".js")) return;
+
+	const routePath = path.join(routesDir, file);
+	const route = require(routePath).default;
+
+	if (!route) return ;
+
+	const routeName = `/${path.parse(file).name}`;
+	router.use(routeName, route);
+
+});
 
 export default router;

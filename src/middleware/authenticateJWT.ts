@@ -16,15 +16,30 @@ function stripUserSensitive(user: User) {
 
 export async function authenticateJWT(req: Request, res: Response, next: NextFunction) {
 
+	let token: string | undefined;
+
 	const authHeader = req.headers.authorization;
-	if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
+	// if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
 
-	const parts = authHeader.trim().split(/\s+/);
-	if (parts.length !== 2 || parts[0]?.toLowerCase() !== "bearer") {
-		return res.status(400).json({ message: "Malformed Authorization header" });
-	}
+	if (authHeader) {
 
-	const token: string = parts[1] as string;
+		const parts = authHeader.trim().split(/\s+/);
+		if (parts.length !== 2 || parts[0]?.toLowerCase() !== "bearer") {
+			return res.status(400).json({ message: "Malformed Authorization header" });
+		}
+
+		token = parts[1] as string;
+
+	};
+
+	if (!token && req.cookies?.token) {
+		token = req.cookies.token;
+	};
+
+	if (!token) {
+		return res.status(401).json({ message: "Authorization header missing" });
+	};
+
 	const secret: Secret = (process.env.JWT_SECRET ?? "test-secret") as Secret;
 
 	try {

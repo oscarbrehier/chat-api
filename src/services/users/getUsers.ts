@@ -1,45 +1,44 @@
 import { safeUser } from ".";
+import { Prisma } from "../../generated/prisma";
 import prisma from "../../prisma/client";
 
-export async function getUsers(userId: string, query?: string | null, maxEntries?: number) {
+type Options = {
+	searchQuery?: string;
+	maxEntries?: number;
+	excludeUsers?: string[];
+	excludeUserSelf?: boolean;
+};
 
-	try {
-
-		if (query) {
-
-			const users = await prisma.user.findMany({
-				where: {
-					id: {
-						not: userId
-					},
-					name: {
-						contains: query,
-						mode: "insensitive"
-					}
-				},
-				take: maxEntries || 20,
-				select: safeUser
-			});
-
-			return (users);
-
-		} else {
-
-			const users = await prisma.user.findMany({
-				where: {
-					id: {
-						not: userId
-					}
-				},
-				select: safeUser
-			});
-
-			return (users);
-
-		}
-
-	} catch (err) {
-		throw err;
+export async function getUsers(
+	userId: string,
+	options: Options = {
+		excludeUserSelf: true
 	}
+) {
+
+	const { searchQuery, maxEntries, excludeUsers = [], excludeUserSelf } = options;
+
+	const where: Prisma.UserWhereInput = {
+		id: {
+			notIn: [
+				...(excludeUserSelf ? [userId] : []),
+				...excludeUsers
+			]
+		},
+		...(searchQuery && {
+			name: {
+				contains: searchQuery,
+				mode: "insensitive"
+			}
+		})
+	};
+
+	const users = await prisma.user.findMany({
+		where,
+		take: maxEntries || 10,
+		select: safeUser
+	});
+
+	return (users);
 
 };

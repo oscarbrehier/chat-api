@@ -5,13 +5,30 @@ export async function getAllUsersController(req: Request, res: Response, next: N
 
 	try {
 
-		const searchQuery = typeof req.query?.search === "string" ? req.query.search : null;
 		const maxEntries =
 			typeof req.query?.maxEntries === "string"
 				? parseInt(req.query.maxEntries, 10)
-				: 0;
+				: 10;
 
-		const users = await getUsers(req.user?.id!, searchQuery, maxEntries);
+		const excludeUserSelf =
+			req.query.excludeUserSelf === "false"
+				? false
+				: true;
+
+		const excludeUsers = Array.isArray(req.body?.excludeUsers)
+			? req.body.excludeUsers
+			: typeof req.body?.excludeUsers === "string"
+				? [req.body.excludeUsers]
+				: [];
+
+		const options = {
+			...(typeof req.query?.search === "string" && { searchQuery: req.query.search }),
+			maxEntries,
+			excludeUserSelf,
+			excludeUsers,
+		};
+
+		const users = await getUsers(req.user?.id!, options);
 		res.status(200).json(users);
 
 	} catch (err) {

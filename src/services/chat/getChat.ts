@@ -10,6 +10,7 @@ export async function getChat(chatId: string) {
 		select: {
 			id: true,
 			name: true,
+			type: true,
 			createdAt: true,
 			users: {
 				select: {
