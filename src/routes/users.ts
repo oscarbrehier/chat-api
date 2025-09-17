@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { authenticateJWT } from "../middleware/authenticateJWT";
+import { authenticateAccessToken } from "../middleware/authenticateAccessToken";
 import { getAllUsersController } from "../controllers/users/getUsers.controllers";
 
 const router: Router = Router();
 
-router.get("/", authenticateJWT, getAllUsersController);
+router.get("/", authenticateAccessToken, getAllUsersController);
 
 export default router;

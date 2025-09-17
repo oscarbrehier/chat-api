@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload, type Secret } from "jsonwebtoken";
 import prisma from "../prisma/client";
 import { User } from "../generated/prisma";
+import { getTokenFromHeader } from "../utils/getTokenFromBearer";
 
 interface DecodedToken extends JwtPayload {
 	userId: string;
@@ -14,26 +15,24 @@ function stripUserSensitive(user: User) {
 
 };
 
-export async function authenticateJWT(req: Request, res: Response, next: NextFunction) {
+export async function authenticateAccessToken(req: Request, res: Response, next: NextFunction) {
 
 	let token: string | undefined;
-
 	const authHeader = req.headers.authorization;
-	// if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
 
 	if (authHeader) {
 
-		const parts = authHeader.trim().split(/\s+/);
-		if (parts.length !== 2 || parts[0]?.toLowerCase() !== "bearer") {
-			return res.status(400).json({ message: "Malformed Authorization header" });
-		}
-
-		token = parts[1] as string;
+		try {
+			token = getTokenFromHeader(authHeader);
+		} catch (err) {
+			console.error(err);
+			return res.status(400).json({ message: "Invalid Authorization header" })
+		};
 
 	};
 
-	if (!token && req.cookies?.token) {
-		token = req.cookies.token;
+	if (!token && req.cookies?.accessToken) {
+		token = req.cookies.accessToken;
 	};
 
 	if (!token) {
