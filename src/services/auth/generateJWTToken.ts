@@ -4,7 +4,8 @@ export function generateJWTTokens(userId: string): { accessToken: string, refres
 
 	const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET!, {
 		algorithm: 'HS256',
-		expiresIn: 5 * 60
+		// expiresIn: 5 * 60
+		expiresIn: 60
 	});
 
 	const refreshToken = jwt.sign({ userId }, process.env.JWT_SECRET!, {

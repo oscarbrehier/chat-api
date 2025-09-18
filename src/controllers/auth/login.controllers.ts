@@ -13,16 +13,17 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			secure: !isDev,
-			sameSite: "strict",
-			maxAge: 5 * 60 * 1000,
+			secure: true,
+			sameSite: isDev ? "none" : "strict",
+			// maxAge: 5 * 60 * 1000,
+			maxAge: 60000,
 			path: "/"
 		});
 
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
-			secure: !isDev,
-			sameSite: "strict",
+			secure: true,
+			sameSite: isDev ? "none" : "strict",
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/"
 		});
