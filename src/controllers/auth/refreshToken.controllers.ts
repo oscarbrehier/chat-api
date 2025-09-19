@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { refreshAccessToken } from "../../services/auth/refreshAccessToken";
 import jwt from "jsonwebtoken";
+import { accessTokenLifetime } from "../../utils/constants";
 
 export async function refreshTokenController(req: Request, res: Response, next: NextFunction) {
 
@@ -31,8 +32,7 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 			httpOnly: true,
 			secure: !isDev,
 			sameSite: "none",
-			// maxAge: 5 * 60 * 1000,
-			maxAge: 60000,
+			maxAge: accessTokenLifetime * 1000,
 			path: "/"
 		});
 

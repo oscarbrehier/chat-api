@@ -3,6 +3,7 @@ import { sendMessage } from "../services/messages/sendMessage";
 import { getUserChats } from "../services/chat/getUserChats";
 import { SafeUser } from "../../types/user";
 import { io } from "../server";
+import { authenticateSocket } from "./authenticateSocket";
 
 const userSockets: Map<string, Set<string>> = new Map();
 const chatRoomsPrefix = "chat_";
@@ -17,7 +18,14 @@ function getChatRoom(chatId: string) {
 
 export async function onSocketConnection(socket: Socket) {
 
-	const { userId } = socket.data.user;
+	const { userId, exp } = socket.data.user;
+
+	if (!userId || !exp) {
+		socket.emit("unauthorized", "Invalid authentication payload");
+		socket.disconnect();
+		return;
+	};
+
 	const chats = await getUserChats(userId);
 	const userChatIds = chats.map((chat) => chat.id);
 
@@ -29,14 +37,37 @@ export async function onSocketConnection(socket: Socket) {
 
 	chats?.forEach((chat) => socket.join(getChatRoom(chat.id)));
 
+	if (exp) {
+
+		const now = Date.now();
+		const delay = exp * 1000 - now;
+
+		if (delay > 0) {
+
+			const expiryTimeout = setTimeout(() => {
+				socket.emit("unauthorized", "Token expired");
+				socket.disconnect();
+			}, delay);
+
+			socket.on("disconnect", () => clearTimeout(expiryTimeout));
+
+		} else {
+			socket.emit("unauthorized", "Token expired");
+			socket.disconnect();
+			return;
+		}
+
+	}
+
 	socket.on("disconnect", () => {
 
-		userSockets.forEach((sockets, userId) => {
+		const sockets = userSockets.get(userId);
+		if (sockets) {
 			sockets.delete(socket.id);
 			if (sockets.size === 0) {
 				userSockets.delete(userId);
 			};
-		});
+		};
 
 	});
 

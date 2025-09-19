@@ -1,0 +1,1 @@
+export const accessTokenLifetime = 5 * 60; // seconds

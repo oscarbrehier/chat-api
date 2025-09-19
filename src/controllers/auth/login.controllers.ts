@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { login } from "../../services/auth/login.services";
-
+import { accessTokenLifetime } from "../../utils/constants";
 
 export async function loginController(req: Request, res: Response, next: NextFunction) {
 	
@@ -15,8 +15,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
 			httpOnly: true,
 			secure: true,
 			sameSite: isDev ? "none" : "strict",
-			// maxAge: 5 * 60 * 1000,
-			maxAge: 60000,
+			maxAge: accessTokenLifetime * 1000,
 			path: "/"
 		});
 
