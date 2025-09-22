@@ -76,8 +76,6 @@ export async function onSocketConnection(socket: Socket) {
 
 	socket.on("message:send", async (chatId, content, callback) => {
 
-		console.log("Received message", chatId, content);
-
 		if (!userChatIds.includes(chatId)) {
 
 			callback({
@@ -99,8 +97,6 @@ export async function onSocketConnection(socket: Socket) {
 			});
 
 		} catch (err) {
-
-			console.log(err)
 
 			callback({
 				success: false,

@@ -22,8 +22,6 @@ export async function refreshAccessToken(userId: string, refreshToken: string) {
 				storedRefreshToken.userId !== userId
 			) {
 
-				console.log("invalid refresh token")
-
 				await tx.refreshToken.update({
 					where: {
 						token: refreshToken
