@@ -30,16 +30,16 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 		
 		res.cookie("accessToken", newAccessToken, {
 			httpOnly: true,
-			secure: !isDev,
-			sameSite: "none",
+			secure: true,
+			sameSite: isDev ? "none" : "strict",
 			maxAge: accessTokenLifetime * 1000,
 			path: "/"
 		});
 
 		res.cookie("refreshToken", newRefreshToken, {
 			httpOnly: true,
-			secure: !isDev,
-			sameSite: "none",
+			secure: true,
+			sameSite: isDev ? "none" : "strict",
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/"
 		});

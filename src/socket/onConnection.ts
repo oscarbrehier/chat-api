@@ -4,6 +4,7 @@ import { getUserChats } from "../services/chat/getUserChats";
 import { SafeUser } from "../../types/user";
 import { io } from "../server";
 import { authenticateSocket } from "./authenticateSocket";
+import { verify } from "jsonwebtoken";
 
 const userSockets: Map<string, Set<string>> = new Map();
 const chatRoomsPrefix = "chat_";
@@ -15,6 +16,10 @@ function getUserSockets(userId: string) {
 function getChatRoom(chatId: string) {
 	return `${chatRoomsPrefix}${chatId}`;
 };
+
+async function requireClientTokenRefresh() {
+
+}
 
 export async function onSocketConnection(socket: Socket) {
 
@@ -42,22 +47,20 @@ export async function onSocketConnection(socket: Socket) {
 		const now = Date.now();
 		const delay = exp * 1000 - now;
 
-		if (delay > 0) {
+		if (delay > 0) {	
 
 			const expiryTimeout = setTimeout(() => {
-				socket.emit("unauthorized", "Token expired");
-				socket.disconnect();
+
+				socket.emit("token:refresh-required", "Token expired");
+				socket.disconnect()
+
 			}, delay);
 
 			socket.on("disconnect", () => clearTimeout(expiryTimeout));
 
-		} else {
-			socket.emit("unauthorized", "Token expired");
-			socket.disconnect();
-			return;
-		}
+		};
 
-	}
+	};
 
 	socket.on("disconnect", () => {
 

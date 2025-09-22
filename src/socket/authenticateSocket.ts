@@ -17,7 +17,7 @@ export function authenticateSocket(socket: Socket) {
 
 	try {
 
-		const payload = jwt.verify(token, process.env.JWT_SECRET!);
+		const payload = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string, exp: number };
 		socket.data.user = payload;
 
 	} catch (err) {
