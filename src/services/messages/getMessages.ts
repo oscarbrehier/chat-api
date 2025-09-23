@@ -1,20 +1,39 @@
 import prisma from "../../prisma/client";
 import { NotFoundError } from "../../utils/errors";
+import { Prisma } from "../../generated/prisma";
 
-export async function getMessages(chatId: string) {
+export async function getMessages(
+	chatId: string,
+	limit: number = 10,
+	offset: number = 0
+): Promise<{ items: Prisma.MessageWhereInput[], totalCount: number }> {
 
 	try {
-	
-		const chat = await prisma.chat.findUnique({
-			where: { id: chatId },
-			include: {
-				messages: true
-			}
+
+		if (limit > 100) limit = 100;
+
+		const [messages, totalCount] = await prisma.$transaction([
+			prisma.message.findMany({
+				where: {
+					chatId
+				},
+				take: limit,
+				...(offset && { skip: offset }),
+				orderBy: {
+					createdAt: "desc"
+				}
+			}),
+			prisma.message.count({
+				where: { chatId }
+			})
+		]);
+
+		if (!messages) throw new NotFoundError("Chat not found");
+
+		return ({
+			totalCount,
+			items: messages.reverse(),
 		});
-
-		if (!chat) throw new NotFoundError("Chat not found");
-
-		return (chat.messages);
 
 	} catch (error) {
 		throw (error);

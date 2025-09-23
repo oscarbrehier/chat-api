@@ -7,9 +7,13 @@ export async function getMessageController(req: Request, res: Response, next: Ne
 	try {
 
 		if (!req.params.chatId) return res.status(400).json({ error: "Chat ID is required"});
-		const messages = await getMessages(req.params.chatId);
 
-		res.status(200).json(messages);
+		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const offset = req.query.limit ? parseInt(req.query.offset as string, 10) : 0;
+
+		const result = await getMessages(req.params.chatId, limit, offset);
+
+		res.status(200).json(result);
 
 	} catch (err) {
 		next(err);
