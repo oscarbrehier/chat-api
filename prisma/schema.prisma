@@ -15,31 +15,27 @@ datasource db {
 }
 
 model RefreshToken {
-  id        String    @id @default(uuid())
-  token     String    @unique
-  user      User      @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
   userId    String
-  isRevoked Boolean   @default(false)
+  isRevoked Boolean  @default(false)
   revokedAt DateTime?
   expiryAt  DateTime
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }
 
 model User {
-  id                  String         @id @default(uuid())
-  email               String         @unique
-  password            String
-  name                String
-  publicKey           String?
-  encryptedPrivateKey String?
-  encryptionSalt      String?
-  encryptionNonce     String?
-  chats               Chat[]         @relation("UserChats")
-  messages            Message[]
-  refreshTokens       RefreshToken[]
-  createdAt           DateTime       @default(now())
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String
+  chats         Chat[]         @relation("UserChats")
+  messages      Message[]
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
 
   @@index([name])
 }
@@ -54,12 +50,11 @@ model Chat {
 }
 
 model Message {
-  id         String   @id @default(uuid())
-  // content   String
-  cipherText String
-  chat       Chat     @relation(fields: [chatId], references: [id])
-  chatId     String
-  sender     User     @relation(fields: [senderId], references: [id])
-  senderId   String
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  content   String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String
+  createdAt DateTime @default(now())
 }

@@ -3,8 +3,6 @@ import { sendMessage } from "../services/messages/sendMessage";
 import { getUserChats } from "../services/chat/getUserChats";
 import { SafeUser } from "../../types/user";
 import { io } from "../server";
-import { authenticateSocket } from "./authenticateSocket";
-import { verify } from "jsonwebtoken";
 
 const userSockets: Map<string, Set<string>> = new Map();
 const chatRoomsPrefix = "chat_";
@@ -17,10 +15,6 @@ function getChatRoom(chatId: string) {
 	return `${chatRoomsPrefix}${chatId}`;
 };
 
-async function requireClientTokenRefresh() {
-
-}
-
 export async function onSocketConnection(socket: Socket) {
 
 	const { userId, exp } = socket.data.user;
@@ -32,28 +26,25 @@ export async function onSocketConnection(socket: Socket) {
 	};
 
 	const chats = await getUserChats(userId);
-	const userChatIds = chats.map((chat) => chat.id);
+	socket.data.userChatIds = chats.map((chat) => chat.id);
 
 	if (!userSockets.has(userId)) {
 		userSockets.set(userId, new Set());
 	};
 
 	userSockets.get(userId)!.add(socket.id);
-
-	chats?.forEach((chat) => socket.join(getChatRoom(chat.id)));
+	chats.forEach((chat) => socket.join(getChatRoom(chat.id)));
 
 	if (exp) {
 
 		const now = Date.now();
 		const delay = exp * 1000 - now;
 
-		if (delay > 0) {	
+		if (delay > 0) {
 
 			const expiryTimeout = setTimeout(() => {
-
 				socket.emit("token:refresh-required", "Token expired");
-				socket.disconnect()
-
+				socket.disconnect();
 			}, delay);
 
 			socket.on("disconnect", () => clearTimeout(expiryTimeout));
@@ -65,36 +56,31 @@ export async function onSocketConnection(socket: Socket) {
 	socket.on("disconnect", () => {
 
 		const sockets = userSockets.get(userId);
+
 		if (sockets) {
+
 			sockets.delete(socket.id);
 			if (sockets.size === 0) {
 				userSockets.delete(userId);
 			};
+
 		};
 
 	});
 
 	socket.on("message:send", async (chatId, content, callback) => {
 
-		if (!userChatIds.includes(chatId)) {
-
-			callback({
-				success: false,
-				error: "Unauthorized chat access"
-			});
+		if (!socket.data.userChatIds.includes(chatId)) {
+			callback({ success: false, error: "Unauthorized chat access" });
 			return;
-
-		}
+		};
 
 		try {
 
 			const message = await sendMessage(chatId, userId, content);
-			socket.to(getChatRoom(chatId)).emit("message:receive", message);
 
-			callback({
-				success: true,
-				message
-			});
+			io.to(getChatRoom(chatId)).emit("message:receive", message);
+			callback({ success: true, message });
 
 		} catch (err) {
 
@@ -104,40 +90,56 @@ export async function onSocketConnection(socket: Socket) {
 				error: (err as Error).message
 			});
 
-		}
+		};
 
 	});
 
 	socket.on("chat:create", async (chatId, creatorId, users, callback) => {
 
 		try {
+		
+			socket.join(getChatRoom(chatId));
+			if (!socket.data.userChatIds.includes(chatId)) {
+				socket.data.userChatIds.push(chatId);
+			};
 
 			users.forEach((user: SafeUser) => {
 
-				const userSocket = getUserSockets(user.id);
+				if (user.id === creatorId) return;
 
-				if (userSocket.size > 0) {
-					userSocket.forEach(socketId => {
-						io.to(socketId).socketsJoin(getChatRoom(chatId));
-						io.to(socketId).emit("chat:created", {
-							chatId,
-							createdBy: creatorId
-						});
+				const sockets = getUserSockets(user.id);
+
+				sockets.forEach(socketId => {
+
+					const recipientSocket = io.sockets.sockets.get(socketId);
+					if (!recipientSocket) return;
+
+					recipientSocket.join(getChatRoom(chatId));
+
+					if (!recipientSocket.data.userChatIds) {
+						recipientSocket.data.userChatIds = [];
+					};
+
+					if (!recipientSocket.data.userChatIds.includes(chatId)) {
+						recipientSocket.data.userChatIds.push(chatId);
+					};
+
+					recipientSocket.emit("chat:created", {
+						chatId,
+						createdBy: creatorId
 					});
-				};
+
+				});
 
 			});
 
-			callback({
-				success: true
-			});
+			callback({ success: true });
 
 		} catch (err) {
 
-			if (callback) callback({
-				success: false,
-				error: (err as Error).message
-			})
+			if (callback) {
+				callback({ success: false, error: (err as Error).message });
+			};
 
 		};
 
