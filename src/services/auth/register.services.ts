@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import prisma from "../../prisma/client";
 import jwt from "jsonwebtoken";
+import { generateJWTTokens } from "./generateJWTToken";
+import { storeRefreshToken } from "./storeRefreshToken";
+import { safeUser } from "../users";
 
 export async function register(email: string, name: string, password: string) {
 
@@ -12,14 +15,26 @@ export async function register(email: string, name: string, password: string) {
 				name,
 				email,
 				password: hashedPassword
-			}
+			},
+			select: safeUser
 		});
 
-		const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+		const { accessToken, refreshToken } = await prisma.$transaction(async (tx) => {
+
+			const { accessToken, refreshToken } = generateJWTTokens(user.id);
+			await storeRefreshToken(user.id, refreshToken, tx);
+
+			return {
+				accessToken,
+				refreshToken
+			};
+
+		});
 
 		return {
 			user,
-			token
+			accessToken,
+			refreshToken
 		};
 
 	} catch (err) {
