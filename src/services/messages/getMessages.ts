@@ -6,7 +6,11 @@ export async function getMessages(
 	chatId: string,
 	limit: number = 10,
 	offset: number = 0
-): Promise<{ items: Prisma.MessageWhereInput[], totalCount: number }> {
+): Promise<{
+	items: (Prisma.MessageGetPayload<{
+		include: { readBy: true }
+	}>)[], totalCount: number
+}> {
 
 	try {
 
@@ -21,6 +25,9 @@ export async function getMessages(
 				...(offset && { skip: offset }),
 				orderBy: {
 					createdAt: "desc"
+				},
+				include: {
+					readBy: true
 				}
 			}),
 			prisma.message.count({

@@ -15,14 +15,14 @@ datasource db {
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  user      User     @relation(fields: [userId], references: [id])
+  id        String    @id @default(uuid())
+  token     String    @unique
+  user      User      @relation(fields: [userId], references: [id])
   userId    String
-  isRevoked Boolean  @default(false)
+  isRevoked Boolean   @default(false)
   revokedAt DateTime?
   expiryAt  DateTime
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
@@ -36,6 +36,7 @@ model User {
   messages      Message[]
   refreshTokens RefreshToken[]
   createdAt     DateTime       @default(now())
+  MessageRead   MessageRead[]
 
   @@index([name])
 }
@@ -50,11 +51,23 @@ model Chat {
 }
 
 model Message {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  chat      Chat          @relation(fields: [chatId], references: [id])
   chatId    String
-  sender    User     @relation(fields: [senderId], references: [id])
+  sender    User          @relation(fields: [senderId], references: [id])
   senderId  String
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
+  readBy    MessageRead[]
+}
+
+model MessageRead {
+  id        String   @id @default(uuid())
+  message   Message  @relation(fields: [messageId], references: [id])
+  messageId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  seenAt    DateTime @default(now())
+
+  @@unique([messageId, userId])
 }

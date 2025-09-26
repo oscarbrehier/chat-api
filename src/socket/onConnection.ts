@@ -3,6 +3,7 @@ import { sendMessage } from "../services/messages/sendMessage";
 import { getUserChats } from "../services/chat/getUserChats";
 import { SafeUser } from "../../types/user";
 import { io } from "../server";
+import { registerMessageHandler } from "./messageHandler";
 
 const userSockets: Map<string, Set<string>> = new Map();
 const chatRoomsPrefix = "chat_";
@@ -11,7 +12,7 @@ function getUserSockets(userId: string) {
 	return userSockets.get(userId) || new Set();
 };
 
-function getChatRoom(chatId: string) {
+export function getChatRoom(chatId: string) {
 	return `${chatRoomsPrefix}${chatId}`;
 };
 
@@ -144,5 +145,7 @@ export async function onSocketConnection(socket: Socket) {
 		};
 
 	});
+
+	registerMessageHandler(socket);
 
 };
