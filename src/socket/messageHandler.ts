@@ -4,6 +4,8 @@ import { markAsRead } from "../services/messages/markAsRead";
 import { io } from "../server";
 import { getChatRoom } from "./onConnection";
 import { addMessageReaction } from "../services/messages/addReaction";
+import { deleteMessage } from "../services/messages/deleteMessage";
+import { NotFoundError } from "../utils/errors";
 
 export function registerMessageHandler(socket: Socket) {
 
@@ -26,11 +28,7 @@ export function registerMessageHandler(socket: Socket) {
 
 		try {
 
-
-			console.log("received reaction for", chatId, messageId, userId, emoji);
 			const result = await addMessageReaction(messageId, userId, emoji);
-			
-			console.log("result", result)
 
 			if (result.added) {
 				io.to(getChatRoom(chatId)).emit("message:reaction", { messageId, reaction: result.reaction });
@@ -41,6 +39,28 @@ export function registerMessageHandler(socket: Socket) {
 
 		} catch (err) {
 			console.log(err)
+		};
+
+	});
+
+	socket.on("message:delete", async ({ messageId, userId }, callback) => {
+
+		try {
+
+			const deleted = await deleteMessage(messageId, userId);
+			callback({ deleted: true });
+			io.to(getChatRoom(deleted.chatId)).emit("message:delete", messageId);
+
+		} catch (err) {
+
+			if (err instanceof NotFoundError) {
+				callback({ deleted: false, error: "Message not found or unauthorized" });
+			} else {
+				callback({ deleted: false, error: "Failed to delete message" });
+			};
+
+			console.log("Failed to delete message: ", (err as Error).message);
+
 		};
 
 	});
