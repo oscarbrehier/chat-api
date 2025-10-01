@@ -28,15 +28,16 @@ model RefreshToken {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
+  id            String          @id @default(uuid())
+  email         String          @unique
   password      String
   name          String
-  chats         Chat[]         @relation("UserChats")
+  chats         Chat[]          @relation("UserChats")
   messages      Message[]
   refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
+  createdAt     DateTime        @default(now())
   MessageRead   MessageRead[]
+  EmojiReaction EmojiReaction[]
 
   @@index([name])
 }
@@ -51,14 +52,15 @@ model Chat {
 }
 
 model Message {
-  id        String        @id @default(uuid())
-  content   String
-  chat      Chat          @relation(fields: [chatId], references: [id])
-  chatId    String
-  sender    User          @relation(fields: [senderId], references: [id])
-  senderId  String
-  createdAt DateTime      @default(now())
-  readBy    MessageRead[]
+  id             String          @id @default(uuid())
+  content        String
+  chat           Chat            @relation(fields: [chatId], references: [id])
+  chatId         String
+  sender         User            @relation(fields: [senderId], references: [id])
+  senderId       String
+  emojiReactions EmojiReaction[]
+  createdAt      DateTime        @default(now())
+  readBy         MessageRead[]
 }
 
 model MessageRead {
@@ -70,4 +72,15 @@ model MessageRead {
   seenAt    DateTime @default(now())
 
   @@unique([messageId, userId])
+}
+
+model EmojiReaction {
+  id        String  @id @default(uuid())
+  emoji     String
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@unique([messageId, userId, emoji])
 }

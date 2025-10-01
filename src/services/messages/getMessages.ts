@@ -27,7 +27,8 @@ export async function getMessages(
 					createdAt: "desc"
 				},
 				include: {
-					readBy: true
+					readBy: true,
+					emojiReactions: true
 				}
 			}),
 			prisma.message.count({
