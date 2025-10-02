@@ -6,6 +6,7 @@ import { getChatRoom } from "./onConnection";
 import { addMessageReaction } from "../services/messages/addReaction";
 import { deleteMessage } from "../services/messages/deleteMessage";
 import { NotFoundError } from "../utils/errors";
+import { emitToRoom } from "./utils.socket";
 
 export function registerMessageHandler(socket: Socket) {
 
@@ -63,6 +64,10 @@ export function registerMessageHandler(socket: Socket) {
 
 		};
 
+	});
+
+	socket.on("message:typing", ({ chatId, userId, isTyping }) => {
+		emitToRoom(chatId, "message:typing", { userId, isTyping });
 	});
 
 };

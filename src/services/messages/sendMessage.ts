@@ -2,7 +2,7 @@ import prisma from "../../prisma/client";
 import { BadRequestError, NotFoundError } from "../../utils/errors";
 import { getChat } from "../chat/getChat";
 
-export async function sendMessage(chatId: string, senderId: string, content: string) {
+export async function sendMessage(chatId: string, senderId: string, content: string, imageUrl: string | null) {
 
 	if (!chatId) throw new BadRequestError("Chat ID is required");
 	if (!content || !content.trim()) throw new BadRequestError("Message content cannot be empty");
@@ -14,7 +14,8 @@ export async function sendMessage(chatId: string, senderId: string, content: str
 		data: {
 			chatId,
 			senderId,
-			content: content.trim()
+			content: content.trim(),
+			...(imageUrl && { imageUrl })
 		}
 	});
 

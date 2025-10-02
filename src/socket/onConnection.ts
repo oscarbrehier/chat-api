@@ -4,6 +4,7 @@ import { getUserChats } from "../services/chat/getUserChats";
 import { SafeUser } from "../../types/user";
 import { io } from "../server";
 import { registerMessageHandler } from "./messageHandler";
+import { uploadImage } from "../utils/supabase/uploadImage";
 
 const userSockets: Map<string, Set<string>> = new Map();
 const chatRoomsPrefix = "chat_";
@@ -69,7 +70,7 @@ export async function onSocketConnection(socket: Socket) {
 
 	});
 
-	socket.on("message:send", async (chatId, content, callback) => {
+	socket.on("message:send", async (chatId, content, imageUrl, callback) => {
 
 		if (!socket.data.userChatIds.includes(chatId)) {
 			callback({ success: false, error: "Unauthorized chat access" });
@@ -78,12 +79,14 @@ export async function onSocketConnection(socket: Socket) {
 
 		try {
 
-			const message = await sendMessage(chatId, userId, content);
+			const message = await sendMessage(chatId, userId, content, imageUrl);
 
 			io.to(getChatRoom(chatId)).emit("message:receive", message);
 			callback({ success: true, message });
 
 		} catch (err) {
+
+			console.log(err)
 
 			callback({
 				success: false,

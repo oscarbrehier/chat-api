@@ -5,82 +5,83 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model RefreshToken {
-  id        String    @id @default(uuid())
-  token     String    @unique
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  isRevoked Boolean   @default(false)
-  revokedAt DateTime?
-  expiryAt  DateTime
-  createdAt DateTime  @default(now())
+    id        String    @id @default(uuid())
+    token     String    @unique
+    user      User      @relation(fields: [userId], references: [id])
+    userId    String
+    isRevoked Boolean   @default(false)
+    revokedAt DateTime?
+    expiryAt  DateTime
+    createdAt DateTime  @default(now())
 
-  @@index([userId])
+    @@index([userId])
 }
 
 model User {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  password      String
-  name          String
-  chats         Chat[]          @relation("UserChats")
-  messages      Message[]
-  refreshTokens RefreshToken[]
-  createdAt     DateTime        @default(now())
-  MessageRead   MessageRead[]
-  EmojiReaction EmojiReaction[]
+    id            String          @id @default(uuid())
+    email         String          @unique
+    password      String
+    name          String
+    chats         Chat[]          @relation("UserChats")
+    messages      Message[]
+    refreshTokens RefreshToken[]
+    createdAt     DateTime        @default(now())
+    MessageRead   MessageRead[]
+    EmojiReaction EmojiReaction[]
 
-  @@index([name])
+    @@index([name])
 }
 
 model Chat {
-  id        String    @id @default(uuid())
-  name      String?
-  users     User[]    @relation("UserChats")
-  messages  Message[]
-  type      String    @default("dm")
-  createdAt DateTime  @default(now())
+    id        String    @id @default(uuid())
+    name      String?
+    users     User[]    @relation("UserChats")
+    messages  Message[]
+    type      String    @default("dm")
+    createdAt DateTime  @default(now())
 }
 
 model Message {
-  id             String          @id @default(uuid())
-  content        String
-  chat           Chat            @relation(fields: [chatId], references: [id])
-  chatId         String
-  sender         User            @relation(fields: [senderId], references: [id])
-  senderId       String
-  emojiReactions EmojiReaction[]
-  createdAt      DateTime        @default(now())
-  readBy         MessageRead[]
+    id             String          @id @default(uuid())
+    content        String
+    imageUrl       String?
+    chat           Chat            @relation(fields: [chatId], references: [id])
+    chatId         String
+    sender         User            @relation(fields: [senderId], references: [id])
+    senderId       String
+    emojiReactions EmojiReaction[]
+    createdAt      DateTime        @default(now())
+    readBy         MessageRead[]
 }
 
 model MessageRead {
-  id        String   @id @default(uuid())
-  message   Message  @relation(fields: [messageId], references: [id])
-  messageId String
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  seenAt    DateTime @default(now())
+    id        String   @id @default(uuid())
+    message   Message  @relation(fields: [messageId], references: [id])
+    messageId String
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String
+    seenAt    DateTime @default(now())
 
-  @@unique([messageId, userId])
+    @@unique([messageId, userId])
 }
 
 model EmojiReaction {
-  id        String  @id @default(uuid())
-  emoji     String
-  message   Message @relation(fields: [messageId], references: [id])
-  messageId String
-  user      User    @relation(fields: [userId], references: [id])
-  userId    String
+    id        String  @id @default(uuid())
+    emoji     String
+    message   Message @relation(fields: [messageId], references: [id])
+    messageId String
+    user      User    @relation(fields: [userId], references: [id])
+    userId    String
 
-  @@unique([messageId, userId, emoji])
+    @@unique([messageId, userId, emoji])
 }

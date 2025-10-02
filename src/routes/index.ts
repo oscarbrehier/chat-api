@@ -17,6 +17,7 @@ fs.readdirSync(routesDir).forEach((file) => {
 
 	const routeName = `/${path.parse(file).name}`;
 	router.use(routeName, route);
+	console.log(`[Router] OK: ${routeName}`);
 
 });
 
