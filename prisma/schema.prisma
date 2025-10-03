@@ -33,6 +33,7 @@ model User {
     password      String
     name          String
     chats         Chat[]          @relation("UserChats")
+    avatarPath    String?
     messages      Message[]
     refreshTokens RefreshToken[]
     createdAt     DateTime        @default(now())

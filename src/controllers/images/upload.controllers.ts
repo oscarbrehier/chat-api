@@ -10,21 +10,16 @@ export async function uploadImageController(req: Request, res: Response, next: N
 
 		if (!file) {
 			return res.status(400).json({ error: "No file provided" });
-		}
+		};
 
 		const { bucket, chatId } = req.body;
-		
-		const safeName = file.originalname.replace(/\s+/g, "_");
-		const uniqueName = `${Date.now()}-${randomUUID()}-${safeName}`;
-		const path = `${chatId}/${uniqueName}`;
+		const upload = await uploadImage(file, bucket, chatId);
 
-		const url = await uploadImage(file.buffer, bucket, path);
-
-		if (!url) {
+		if (upload.error) {
 			return res.status(500).json({ error: "Upload failed" });
 		};
 
-		return res.status(200).json({ url });
+		return res.status(200).json({ url: upload.url });
 
 	} catch (err) {
 		next(err);
