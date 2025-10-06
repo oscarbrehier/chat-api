@@ -1,6 +1,7 @@
 import { safeUser } from "..";
 import prisma from "../../../prisma/client";
 import { getSignedUrl } from "../../../utils/supabase/getSignedUrl";
+import { getAvatarUrl } from "../../../utils/supabase/getAvatarUrl";
 
 export async function getMe(userId: string) {
 
@@ -12,7 +13,7 @@ export async function getMe(userId: string) {
 	});
 
 	if (user && user.avatarPath) {
-		avatarUrl = await getSignedUrl("avatar", user.avatarPath);
+		avatarUrl = await getAvatarUrl(user.avatarPath);
 	};
 
 	return {

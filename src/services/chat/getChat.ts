@@ -1,5 +1,6 @@
 import prisma from "../../prisma/client"
 import { NotFoundError } from "../../utils/errors";
+import { safeUser } from "../users";
 
 export async function getChat(chatId: string) {
 
@@ -13,12 +14,7 @@ export async function getChat(chatId: string) {
 			type: true,
 			createdAt: true,
 			users: {
-				select: {
-					id: true,
-					name: true,
-					email: true,
-					createdAt: true
-				}
+				select: safeUser
 			}
 		}
 	});

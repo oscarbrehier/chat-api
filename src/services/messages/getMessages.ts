@@ -1,6 +1,7 @@
 import prisma from "../../prisma/client";
 import { NotFoundError } from "../../utils/errors";
 import { Prisma } from "../../generated/prisma";
+import { getAvatarUrl } from "../../utils/supabase/getAvatarUrl";
 
 export async function getMessages(
 	chatId: string,
@@ -28,7 +29,8 @@ export async function getMessages(
 				},
 				include: {
 					readBy: true,
-					emojiReactions: true
+					emojiReactions: true,
+					sender: true
 				}
 			}),
 			prisma.message.count({
@@ -38,9 +40,30 @@ export async function getMessages(
 
 		if (!messages) throw new NotFoundError("Chat not found");
 
+		const processedMessages = await Promise.all(
+			messages.map(async (message) => {
+
+				if (message.sender?.avatarPath) {
+					
+					const avatarUrl = await getAvatarUrl(message.sender.avatarPath);
+					return {
+						...message,
+						sender: {
+							...message.sender,
+							avatarUrl: avatarUrl
+						}
+					};
+
+				};
+
+				return message;
+
+			})
+		);
+
 		return ({
 			totalCount,
-			items: messages.reverse(),
+			items: processedMessages.reverse(),
 		});
 
 	} catch (error) {
