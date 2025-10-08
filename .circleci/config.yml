@@ -39,17 +39,17 @@ jobs:
       - run:
           name: Deploy to VPS
           command: |
-            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes deployer@$SERVER_IP << 'EOF'
-              set -e
-              cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api
-              cd ~/chat-api
-              git pull origin main
-              npm install
-              export DATABASE_URL="${DATABASE_URL}"
-              npx prisma generate
-              npm run build
-              pm2 restart chat-api || pm2 start dist/server.js --name chat-api
-            EOF
+            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes deployer@$SERVER_IP "\
+              set -e && \
+              cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api && \
+              cd ~/chat-api && \
+              git pull origin main && \
+              npm install && \
+              export DATABASE_URL='${DATABASE_URL}' && \
+              npx prisma generate && \
+              npm run build && \
+              pm2 restart chat-api || pm2 start dist/server.js --name chat-api \
+            "
 
 workflows:
   version: 2
