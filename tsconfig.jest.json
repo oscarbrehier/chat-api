@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "types": ["jest", "node"],
+    "types": ["node"],
     "noEmit": true,
     "isolatedModules": false
   },
