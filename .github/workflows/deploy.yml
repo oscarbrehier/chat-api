@@ -11,6 +11,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Set up WARP for IPv6
+        uses: fscarmen/warp-on-actions@v1.1
+        with:
+          stack: dual
+      
+      - name: Test IPv6 connectivity
+        run: |
+          echo "Testing IPv6 connectivity..."
+          curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
+        
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -37,7 +47,7 @@ jobs:
           protocol: tcp6
           port: 22
           timeout: 60s
-          use_insecure_cipher: false
+          command_timeout: 30s
           script: |
             echo "Connected successfully!"
             pwd
@@ -49,9 +59,10 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          protocol: tcp6
           port: 22
           timeout: 60s
-          use_insecure_cipher: false
+          command_timeout: 30s
           script: |
             cd ${{ secrets.APP_DIR }}
             git pull origin main
