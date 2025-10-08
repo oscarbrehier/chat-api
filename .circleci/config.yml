@@ -27,12 +27,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - add_ssh_keys:
-          fingerprints:
-            - "<<YOUR_KEY_FINGERPRINT>>"
+      - add_ssh_keys
       - run:
           name: Verify SSH connection
-          command: ssh -o StrictHostKeyChecking=no deployer@$SERVER_IP "echo 'SSH connection successful'"
+          command: ssh -o StrictHostKeyChecking=no deployer@$SERVER_IP "echo '✅ SSH connection successful'"
       - run:
           name: Deploy to VPS
           command: |
