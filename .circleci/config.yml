@@ -30,6 +30,8 @@ jobs:
       - run:
           name: Deploy to VPS
           command: |
+            echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
             ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} " \
               cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api && \
               cd ~/chat-api && \
