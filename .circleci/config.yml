@@ -28,11 +28,16 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: Deploy to VPS
+          name: Setup SSH key
           command: |
+            mkdir -p ~/.ssh
             echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
             chmod 600 ~/.ssh/id_ed25519
-            ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} " \
+            ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      - run:
+          name: Deploy to VPS
+          command: |
+            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes deployer@${SERVER_IP} "\
               cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api && \
               cd ~/chat-api && \
               git pull origin main && \
