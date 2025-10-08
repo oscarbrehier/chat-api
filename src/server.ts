@@ -1,8 +1,11 @@
+import dotenv from "dotenv";
 import { createServer } from "http";
 import app from "./app";
 import { Server } from "socket.io";
 import { onSocketConnection } from "./socket/onConnection";
 import { authenticateSocket } from "./socket/authenticateSocket";
+
+dotenv.config();
 
 const port = process.env.PORT || 3000;
 
