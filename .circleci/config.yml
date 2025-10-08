@@ -30,7 +30,8 @@ jobs:
       - run:
           name: Deploy to VPS
           command: |
-            ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} \<< 'EOF'
+            ssh -tt -o StrictHostKeyChecking=no deployer@${SERVER_IP} \<< 'EOF'
+            set -x   # This will print each command as it runs
             cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api
             cd ~/chat-api
             git pull origin main
