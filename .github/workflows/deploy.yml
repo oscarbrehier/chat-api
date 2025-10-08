@@ -23,7 +23,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to server
-        uses: appleboy/ssh-actions@v1
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
