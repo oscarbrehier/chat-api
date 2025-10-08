@@ -1,10 +1,14 @@
 version: 2.1
 
-jobs:
-  build:
+executors:
+  node-executor:
     docker:
       - image: circleci/node:20
     working_directory: ~/repo
+
+jobs:
+  build:
+    executor: node-executor
     steps:
       - checkout
       - run:
@@ -19,30 +23,31 @@ jobs:
             - .
 
   deploy:
-  docker:
-    - image: circleci/node:20
-  working_directory: ~/repo
-  steps:
-    - attach_workspace:
-        at: ~/repo
-    - run:
-        name: Deploy to VPS
-        command: |
-          ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} \<< 'EOF'
-          cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api
-          cd ~/chat-api
-          git pull origin main
-          npm install
+    executor: node-executor
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Deploy to VPS
+          command: |
+            ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} \<< 'EOF'
+            cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api
+            cd ~/chat-api
+            git pull origin main
+            npm install
 
-          # Generate Prisma client
-          npx prisma generate
+            # Set environment variable for Prisma
+            export DATABASE_URL="${DATABASE_URL}"
 
-          # Build project
-          npm run build
+            # Generate Prisma client
+            npx prisma generate
 
-          # Restart app with PM2
-          pm2 restart chat-api || pm2 start dist/src/server.js --name chat-api
-          EOF
+            # Build project
+            npm run build
+
+            # Restart app with PM2
+            pm2 restart chat-api || pm2 start dist/src/server.js --name chat-api
+            EOF
 
 workflows:
   version: 2
