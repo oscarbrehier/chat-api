@@ -1,99 +1,47 @@
-# .circleci/config.yml
 version: 2.1
 
 jobs:
-  deploy:
-    machine:
-      image: ubuntu-2204:current    # valid machine image
-    resource_class: medium 
-    environment:
-      NODE_VERSION: 20
-      DATABASE_URL: $DATABASE_URL
-      JWT_SECRET: $JWT_SECRET
-      APP_DIR: $APP_DIR
+  build:
+    docker:
+      - image: circleci/node:20
+    working_directory: ~/repo
     steps:
       - checkout
-
-      - run:
-          name: Test IPv6 connectivity
-          command: |
-            echo "Testing IPv6 connectivity..."
-            curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
-
-      - run:
-          name: Install Node.js
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-
       - run:
           name: Install dependencies
           command: npm install
-
       - run:
-          name: Generate Prisma client
-          command: npx prisma generate
-
-      - run:
-          name: Build app
+          name: Build project
           command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
+  deploy:
+    docker:
+      - image: circleci/node:20
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
       - run:
-          name: Test SSH connection
+          name: Deploy to VPS
           command: |
-            echo "$SSH_PRIVATE_KEY" > private_key.pem
-            chmod 600 private_key.pem
-            ssh -6 -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP "echo Connected successfully; pwd; whoami"
-
-      - run:
-          name: Deploy to server
-          command: |
-            echo "$SSH_PRIVATE_KEY" > private_key.pem
-            chmod 600 private_key.pem
-            ssh -6 -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP "
-              set -e
-              echo 'Checking if app directory exists...'
-              if [ ! -d '$APP_DIR/.git' ]; then
-                echo 'Directory does not exist or is not a git repo. Creating and cloning repository...'
-                mkdir -p $APP_DIR
-                cd $APP_DIR
-                git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
-              fi
-
-              echo 'Navigating to app directory...'
-              cd $APP_DIR
-
-              echo 'Pulling latest changes...'
-              git pull origin main
-
-              echo 'Installing dependencies...'
-              npm install --omit=dev
-
-              echo 'Generating Prisma client...'
-              npx prisma generate
-
-              echo 'Building application...'
-              npm run build
-
-              echo 'Running database migrations...'
-              npx prisma migrate deploy
-
-              echo 'Managing PM2 process...'
-              if pm2 list | grep -q 'chat-api'; then
-                pm2 restart chat-api
-              else
-                pm2 start dist/server.js --name chat-api
-              fi
-
-              pm2 save
-              echo 'Deployment completed successfully!'
-            "
+            ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} << 'EOF'
+            cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api
+            cd ~/chat-api
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart chat-api || pm2 start dist/src/server.js --name chat-api
+            EOF
 
 workflows:
   version: 2
-  deploy_on_main:
+  build_and_deploy:
     jobs:
+      - build
       - deploy:
-          filters:
-            branches:
-              only: main
+          requires:
+            - build
