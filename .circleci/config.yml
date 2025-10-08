@@ -4,8 +4,8 @@ version: 2.1
 jobs:
   deploy:
     machine:
-      image: ubuntu-22.04
-      # Enable IPv6 in Docker / VM if needed
+      image: ubuntu-2204:current    # valid machine image
+    resource_class: medium 
     environment:
       NODE_VERSION: 20
       DATABASE_URL: $DATABASE_URL
