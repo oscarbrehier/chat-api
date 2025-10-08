@@ -2,33 +2,98 @@
 # See: https://circleci.com/docs/reference/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/guides/execution-managed/executor-intro/ & https://circleci.com/docs/reference/configuration-reference/#executor-job
-    docker:
-      # Specify the version you desire here
-      # See: https://circleci.com/developer/images/image/cimg/base
-      - image: cimg/base:current
-
-    # Add steps to the job
-    # See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#steps-overview & https://circleci.com/docs/reference/configuration-reference/#steps
+  deploy:
+    machine:
+      image: ubuntu-22.04
+    environment:
+      NODE_VERSION: 20
+      DATABASE_URL: $DATABASE_URL
+      JWT_SECRET: $JWT_SECRET
+      APP_DIR: $APP_DIR
     steps:
-      # Checkout the code as the first step.
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-      - run:
-          name: "Hello world"
-          command: "Hello world CI/CD!"
 
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/guides/orchestrate/workflows/ & https://circleci.com/docs/reference/configuration-reference/#workflows
+      - run:
+        name: Test IPv6 connectivity
+        command: |
+          echo "Testing IPv6 connectivity..."
+          curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
+
+      - run:
+          name: Install Node.js
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+      
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - run:
+          name: Generate Prisma client
+          command: npx prisma generate
+
+      - run:
+          name: Build app
+          command: npm run build
+
+      - run:
+          name: Test SSH connection
+          command: |
+            echo "$SSH_PRIVATE_KEY" > private_key.pem
+            chmod 600 private_key.pem
+            ssh -6 -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP "echo Connected successfully; pwd; whoami"
+
+      - run:
+          name: Deploy to server
+          command: |
+            echo "$SSH_PRIVATE_KEY" > private_key.pem
+            chmod 600 private_key.pem
+            ssh -6 -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP "
+              set -e
+              echo 'Checking if app directory exists...'
+              if [ ! -d '$APP_DIR/.git' ]; then
+                echo 'Directory does not exist or is not a git repo. Creating and cloning repository...'
+                mkdir -p $APP_DIR
+                cd $APP_DIR
+                git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+              fi
+
+              echo 'Navigating to app directory...'
+              cd $APP_DIR
+
+              echo 'Pulling latest changes...'
+              git pull origin main
+
+              echo 'Installing dependencies...'
+              npm install --omit=dev
+
+              echo 'Generating Prisma client...'
+              npx prisma generate
+
+              echo 'Building application...'
+              npm run build
+
+              echo 'Running database migrations...'
+              npx prisma migrate deploy
+
+              echo 'Managing PM2 process...'
+              if pm2 list | grep -q 'chat-api'; then
+                pm2 restart chat-api
+              else
+                pm2 start dist/server.js --name chat-api
+              fi
+
+              pm2 save
+              echo 'Deployment completed successfully!'
+            "
+
 workflows:
-  say-hello-workflow: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  version: 2
+  deploy_on_main:
     jobs:
-      - say-hello
+      - deploy:
+          filters:
+            branches:
+              only: main
