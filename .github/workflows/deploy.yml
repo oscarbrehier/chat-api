@@ -24,6 +24,9 @@ jobs:
 
       - name: Build app
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
@@ -41,5 +44,5 @@ jobs:
             if pm2 list | grep -q "chat-api"; then
               pm2 restart chat-api
             else
-              pm2 start dist/server.js --name chat-api
+              pm2 start dist/server.js --name chat-api --env production
             fi
