@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/src/server.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npx prisma generate && npx tsc",
     "start": "node dist/src/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },

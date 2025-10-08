@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
-import prisma from "../../prisma/client";
 import jwt from "jsonwebtoken";
+import prisma from "../../prisma/client";
 import { generateJWTTokens } from "./generateJWTToken";
 import { storeRefreshToken } from "./storeRefreshToken";
 import { safeUser } from "../users";

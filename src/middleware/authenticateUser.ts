@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtAuthPayload, JwtPayload, type Secret } from "jsonwebtoken";
 import prisma from "../prisma/client";
-import { User } from "../generated/prisma";
+import { User } from "@prisma/client";
 import { getTokenFromHeader } from "../utils/getTokenFromBearer";
 import { HttpError } from "../utils/errors";
 

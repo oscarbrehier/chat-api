@@ -1,6 +1,6 @@
 import prisma from "../../prisma/client";
 import { NotFoundError } from "../../utils/errors";
-import { Prisma } from "../../generated/prisma";
+import { Prisma } from "@prisma/client";
 import { getAvatarUrl } from "../../utils/supabase/getAvatarUrl";
 
 export async function getMessages(

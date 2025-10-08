@@ -1,5 +1,5 @@
 import { safeUser } from ".";
-import { Prisma } from "../../generated/prisma";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 
 type Options = {
