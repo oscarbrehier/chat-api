@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node-executor:
     docker:
-      - image: circleci/node:20
+      - image: cimg/node:20.8
     working_directory: ~/repo
 
 jobs:
@@ -35,17 +35,9 @@ jobs:
             cd ~/chat-api
             git pull origin main
             npm install
-
-            # Set environment variable for Prisma
             export DATABASE_URL="${DATABASE_URL}"
-
-            # Generate Prisma client
             npx prisma generate
-
-            # Build project
             npm run build
-
-            # Restart app with PM2
             pm2 restart chat-api || pm2 start dist/src/server.js --name chat-api
             EOF
 
