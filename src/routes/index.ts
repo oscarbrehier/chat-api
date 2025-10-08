@@ -9,6 +9,7 @@ fs.readdirSync(routesDir).forEach((file) => {
 
 	if (file.startsWith("index.")) return;
 	if (!file.endsWith(".ts") && !file.endsWith(".js")) return;
+	if (file.endsWith(".d.ts")) return ;
 
 	const routePath = path.join(routesDir, file);
 	const route = require(routePath).default;
