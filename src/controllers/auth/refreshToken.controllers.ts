@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { refreshAccessToken } from "../../services/auth/refreshAccessToken";
-import jwt from "jsonwebtoken";
+import jwt, { JwtAuthPayload } from "jsonwebtoken";
 import { accessTokenLifetime } from "../../utils/constants";
 
 export async function refreshTokenController(req: Request, res: Response, next: NextFunction) {
@@ -13,8 +13,9 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 			return res.status(401).json({ message: "Refresh token missing from request cookies"});
 		};
 
-		const decoded = jwt.decode(refreshToken) as jwt.JwtPayload & { userId?: string };
-		if (!decoded || !decoded?.userId) return res.status(403).json("Invalid or expired refresh token");
+		const decoded = jwt.decode(refreshToken) as JwtAuthPayload;
+		if (!decoded || !decoded?.userId) return res.status(403).json({ message: "Invalid or expired refresh token" });
+		if (decoded.type !== "refresh") return res.status(403).json({ message: "Invalid token type" });
 
 		const {
 			valid,

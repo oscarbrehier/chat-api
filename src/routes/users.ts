@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateAccessToken } from "../middleware/authenticateAccessToken";
+import { authenticateUser } from "../middleware/authenticateUser";
 import { getAllUsersController } from "../controllers/users/getUsers.controllers";
 import multer from "multer";
 import { uploadAvatarController } from "../controllers/users/me/uploadAvatar.controllers";
@@ -15,9 +15,9 @@ const upload = multer({
 	}
 });
 
-router.get("/", authenticateAccessToken, getAllUsersController);
-router.get("/me", authenticateAccessToken, getMeController);
-router.post("/me/avatar", authenticateAccessToken, upload.single("file"), uploadAvatarController);
-router.get("/me/avatar", authenticateAccessToken, getAvatarController);
+router.get("/", authenticateUser, getAllUsersController);
+router.get("/me", authenticateUser, getMeController);
+router.post("/me/avatar", authenticateUser, upload.single("file"), uploadAvatarController);
+router.get("/me/avatar", authenticateUser, getAvatarController);
 
 export default router;

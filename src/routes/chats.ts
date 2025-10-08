@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateAccessToken } from "../middleware/authenticateAccessToken";
+import { authenticateUser } from "../middleware/authenticateUser";
 import { createChatController } from "../controllers/chat/createChat.controllers";
 import { getUserChatsController } from "../controllers/chat/getUserChats.controllers";
 import { updateChatController } from "../controllers/chat/updateChat.controllers";
@@ -9,12 +9,12 @@ import { addUserController } from "../controllers/chat/addUser.controllers";
 
 const router = Router();
 
-router.post("/", authenticateAccessToken, createChatController);
-router.get("/", authenticateAccessToken, getUserChatsController);
-router.get("/:id", authenticateAccessToken, getChatController);
-router.put("/:id", authenticateAccessToken, updateChatController);
-router.delete("/:id", authenticateAccessToken, deleteChatController);
+router.post("/", authenticateUser, createChatController);
+router.get("/", authenticateUser, getUserChatsController);
+router.get("/:id", authenticateUser, getChatController);
+router.put("/:id", authenticateUser, updateChatController);
+router.delete("/:id", authenticateUser, deleteChatController);
 
-router.post("/:id/users", authenticateAccessToken, addUserController);
+router.post("/:id/users", authenticateUser, addUserController);
 
 export default router;

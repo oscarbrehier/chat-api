@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateAccessToken } from "../middleware/authenticateAccessToken";
+import { authenticateUser } from "../middleware/authenticateUser";
 import { sendMessageController } from "../controllers/messages/sendMessage.controllers";
 import { getMessageController } from "../controllers/messages/getMessages.controllers";
 import { updateMessageController } from "../controllers/messages/updateMessage.controllers";
@@ -7,9 +7,9 @@ import { deleteMessageController } from "../controllers/messages/deleteMessage.c
 
 const router = Router();
 
-router.post("/", authenticateAccessToken, sendMessageController);
-router.get("/:chatId", authenticateAccessToken, getMessageController);
-router.put("/:id", authenticateAccessToken, updateMessageController);
-router.delete("/:id", authenticateAccessToken, deleteMessageController);
+router.post("/", authenticateUser, sendMessageController);
+router.get("/:chatId", authenticateUser, getMessageController);
+router.put("/:id", authenticateUser, updateMessageController);
+router.delete("/:id", authenticateUser, deleteMessageController);
 
 export default router;

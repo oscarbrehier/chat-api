@@ -50,7 +50,7 @@ export function registerMessageHandler(socket: Socket) {
 
 			const deleted = await deleteMessage(messageId, userId);
 			callback({ deleted: true });
-			io.to(getChatRoom(deleted.chatId)).emit("message:delete", messageId);
+			socket.broadcast.to(getChatRoom(deleted.chatId)).emit("message:delete", deleted.chatId, messageId);
 
 		} catch (err) {
 
@@ -67,7 +67,7 @@ export function registerMessageHandler(socket: Socket) {
 	});
 
 	socket.on("message:typing", ({ chatId, userId, isTyping }) => {
-		emitToRoom(chatId, "message:typing", { userId, isTyping });
+		socket.broadcast.to(getChatRoom(chatId)).emit("message:typing", { chatId, isTyping });
 	});
 
 };

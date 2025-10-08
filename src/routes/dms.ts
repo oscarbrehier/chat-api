@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { getExistingDMController } from "../controllers/dm/getExistingDM.controllers";
-import { authenticateAccessToken } from "../middleware/authenticateAccessToken";
+import { authenticateUser } from "../middleware/authenticateUser";
 
 const router = Router();
 
-router.get("/existing", authenticateAccessToken, getExistingDMController);
+router.get("/existing", authenticateUser, getExistingDMController);
 
 export default router;
