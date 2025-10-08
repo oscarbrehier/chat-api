@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+
       - name: Build app
         run: npm run build
 
@@ -31,8 +34,10 @@ jobs:
           script: |
             cd ${{ secrets.APP_DIR }}
             git pull origin main
-            npm install -- production
+            npm install --production
+            npx prisma generate
             npm run build
+            npx prisma migrate deploy
             if pm2 list | grep -q "chat-api"; then
               pm2 restart chat-api
             else
