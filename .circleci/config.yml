@@ -1,11 +1,11 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/reference/configuration-reference
+# .circleci/config.yml
 version: 2.1
 
 jobs:
   deploy:
     machine:
       image: ubuntu-22.04
+      # Enable IPv6 in Docker / VM if needed
     environment:
       NODE_VERSION: 20
       DATABASE_URL: $DATABASE_URL
@@ -15,17 +15,17 @@ jobs:
       - checkout
 
       - run:
-        name: Test IPv6 connectivity
-        command: |
-          echo "Testing IPv6 connectivity..."
-          curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
+          name: Test IPv6 connectivity
+          command: |
+            echo "Testing IPv6 connectivity..."
+            curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
 
       - run:
           name: Install Node.js
           command: |
             curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
             sudo apt-get install -y nodejs
-      
+
       - run:
           name: Install dependencies
           command: npm install
