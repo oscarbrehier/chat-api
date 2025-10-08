@@ -27,20 +27,16 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-
+      - add_ssh_keys:
+          fingerprints:
+            - "<<YOUR_KEY_FINGERPRINT>>"
       - run:
-          name: Setup SSH key
-          command: |
-            mkdir -p ~/.ssh
-            echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-            chmod 600 ~/.ssh/id_ed25519
-            ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
-
+          name: Verify SSH connection
+          command: ssh -o StrictHostKeyChecking=no deployer@$SERVER_IP "echo 'SSH connection successful'"
       - run:
           name: Deploy to VPS
           command: |
-            ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes deployer@$SERVER_IP "\
-              set -e && \
+            ssh -o StrictHostKeyChecking=no deployer@${SERVER_IP} "\
               cd ~/chat-api || git clone https://github.com/oscarbrehier/chat-api.git ~/chat-api && \
               cd ~/chat-api && \
               git pull origin main && \
@@ -48,7 +44,7 @@ jobs:
               export DATABASE_URL='${DATABASE_URL}' && \
               npx prisma generate && \
               npm run build && \
-              pm2 restart chat-api || pm2 start dist/server.js --name chat-api \
+              pm2 restart chat-api || pm2 start dist/src/server.js --name chat-api \
             "
 
 workflows:
