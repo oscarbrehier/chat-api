@@ -11,6 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      # Enable IPv6 connectivity using Cloudflare WARP
       - name: Set up WARP for IPv6
         uses: fscarmen/warp-on-actions@v1.1
         with:
@@ -20,7 +21,7 @@ jobs:
         run: |
           echo "Testing IPv6 connectivity..."
           curl -m 9 --ipv6 --verbose https://google.com || echo "IPv6 test failed but continuing..."
-        
+      
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -28,16 +29,16 @@ jobs:
       
       - name: Install dependencies
         run: npm install
-
+      
       - name: Generate Prisma client
         run: npx prisma generate
-
+      
       - name: Build app
         run: npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-
+      
       - name: Test SSH connection
         uses: appleboy/ssh-action@v1
         with:
@@ -48,11 +49,12 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 30s
+          debug: true
           script: |
             echo "Connected successfully!"
             pwd
             whoami
-
+      
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
@@ -62,16 +64,45 @@ jobs:
           protocol: tcp6
           port: 22
           timeout: 60s
-          command_timeout: 30s
+          command_timeout: 120s
           script: |
+            set -e
+            echo "Checking if app directory exists..."
+            if [ ! -d "${{ secrets.APP_DIR }}/.git" ]; then
+              echo "Directory does not exist or is not a git repo. Creating and cloning repository..."
+              mkdir -p ${{ secrets.APP_DIR }}
+              cd ${{ secrets.APP_DIR }}
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+            
+            echo "Navigating to app directory..."
             cd ${{ secrets.APP_DIR }}
+            
+            echo "Pulling latest changes..."
             git pull origin main
-            npm install --production
+            
+            echo "Installing dependencies..."
+            npm install --omit=dev
+            
+            echo "Generating Prisma client..."
             npx prisma generate
+            
+            echo "Building application..."
             npm run build
+            
+            echo "Running database migrations..."
             npx prisma migrate deploy
+            
+            echo "Managing PM2 process..."
             if pm2 list | grep -q "chat-api"; then
+              echo "Restarting existing PM2 process..."
               pm2 restart chat-api
             else
-              pm2 start dist/server.js --name chat-api --env production
+              echo "Starting new PM2 process..."
+              pm2 start dist/server.js --name chat-api
             fi
+            
+            echo "Saving PM2 configuration..."
+            pm2 save
+            
+            echo "Deployment completed successfully!"
