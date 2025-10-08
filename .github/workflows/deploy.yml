@@ -34,6 +34,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          protocol: tcp6
           port: 22
           timeout: 60s
           use_insecure_cipher: false
