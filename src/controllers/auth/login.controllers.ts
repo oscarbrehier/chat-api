@@ -13,7 +13,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			secure: true,
+			secure: isDev ? false : true,
 			sameSite: isDev ? "none" : "strict",
 			maxAge: accessTokenLifetime * 1000,
 			path: "/"
@@ -21,7 +21,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
 
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
-			secure: true,
+			secure: isDev ? false : true,
 			sameSite: isDev ? "none" : "strict",
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/"
