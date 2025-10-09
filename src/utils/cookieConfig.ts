@@ -10,7 +10,7 @@ export function cookieConfig(maxAge: number | undefined): CookieOptions {
 		sameSite: isProduction ? 'lax' : 'lax',
 		maxAge: maxAge,
 		path: "/",
-		...(isProduction && { domain: '.yourdomain.com' })
+		...(isProduction && { domain: '.eggspank.cloud' })
 	};
 
 };
