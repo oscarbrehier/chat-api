@@ -14,17 +14,19 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'lax',
+			sameSite: isProduction ? 'none' : 'lax',
 			maxAge: accessTokenLifetime * 1000,
-			path: "/"
+			path: "/",
+			domain: isProduction ? '.eggspank.cloud' : undefined
 		});
 
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'lax',
+			sameSite: isProduction ? 'none' : 'lax',
 			maxAge: 30 * 24 * 60 * 60 * 1000,
-			path: "/"
+			path: "/",
+			domain: isProduction ? '.eggspank.cloud' : undefined
 		});
 		
 		res.status(200).json(user);
