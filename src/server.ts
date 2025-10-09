@@ -8,9 +8,18 @@ import { authenticateSocket } from "./socket/authenticateSocket";
 dotenv.config();
 
 const port = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === "production";
 
 const server = createServer(app);
-export const io = new Server(server, { cors: { origin: "http://localhost:5173", credentials: true } });
+export const io = new Server(server,
+	{
+		cors: {
+			origin: isProduction
+				? [process.env.FRONTEND_URL as string]
+				: "http://localhost:5137",
+			credentials: true
+		}
+	});
 
 io.use((socket, next) => {
 

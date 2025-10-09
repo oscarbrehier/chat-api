@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { refreshAccessToken } from "../../services/auth/refreshAccessToken";
 import jwt, { JwtAuthPayload } from "jsonwebtoken";
 import { accessTokenLifetime } from "../../utils/constants";
+import { cookieConfig } from "../../utils/cookieConfig";
 
 export async function refreshTokenController(req: Request, res: Response, next: NextFunction) {
 
@@ -26,26 +27,9 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 		if (!valid) {
 			return res.status(401).json({ message: "Invalid refresh token" });
 		};
-
-		const isProduction = process.env.NODE_ENV === 'production';
 		
-		res.cookie("accessToken", newAccessToken, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? 'lax' : 'none',
-			maxAge: accessTokenLifetime * 1000,
-			path: "/",
-			domain: isProduction ? '.eggspank.cloud' : undefined
-		});
-
-		res.cookie("refreshToken", newRefreshToken, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? 'lax' : 'none',
-			maxAge: 30 * 24 * 60 * 60 * 1000,
-			path: "/",
-			domain: isProduction ? '.eggspank.cloud' : undefined
-		});
+		res.cookie("accessToken", newAccessToken, cookieConfig(accessTokenLifetime * 1000));
+		res.cookie("refreshToken", newRefreshToken, cookieConfig(30 * 24 * 60 * 60 * 1000));
 		
 		res.json({
 			success: true

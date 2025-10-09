@@ -8,9 +8,12 @@ import { withErrorHandling } from "./utils/withErrorHandling";
 dotenv.config();
 
 const app: Application = express();
+const isProduction = process.env.NODE_ENV === "production";
 
 app.use(cors({
-	origin: "http://localhost:5173",
+	origin: isProduction
+		? [process.env.FRONTEND_URL as string]
+		: "http://localhost:5137",
 	credentials: true
 }));
 

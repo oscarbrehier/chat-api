@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { login } from "../../services/auth/login.services";
 import { accessTokenLifetime } from "../../utils/constants";
+import { cookieConfig } from "../../utils/cookieConfig";
 
 export async function loginController(req: Request, res: Response, next: NextFunction) {
 	
@@ -9,25 +10,8 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		const { email, password } = req.body;
 		const { user, accessToken, refreshToken } = await login(email, password);
 		
-		const isProduction = process.env.NODE_ENV === 'production';
-		
-		res.cookie("accessToken", accessToken, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? 'lax' : 'none',
-			maxAge: accessTokenLifetime * 1000,
-			path: "/",
-			domain: isProduction ? '.eggspank.cloud' : undefined
-		});
-
-		res.cookie("refreshToken", refreshToken, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? 'lax' : 'none',
-			maxAge: 30 * 24 * 60 * 60 * 1000,
-			path: "/",
-			domain: isProduction ? '.eggspank.cloud' : undefined
-		});
+		res.cookie("accessToken", accessToken, cookieConfig(accessTokenLifetime * 1000));
+		res.cookie("refreshToken", refreshToken, cookieConfig(30 * 24 * 60 * 60 * 1000));
 		
 		res.status(200).json(user);
 
