@@ -14,7 +14,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: isProduction ? 'lax' : 'none',
 			maxAge: accessTokenLifetime * 1000,
 			path: "/",
 			domain: isProduction ? '.eggspank.cloud' : undefined
@@ -23,7 +23,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: isProduction ? 'lax' : 'none',
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/",
 			domain: isProduction ? '.eggspank.cloud' : undefined

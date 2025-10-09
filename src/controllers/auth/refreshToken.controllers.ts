@@ -32,7 +32,7 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 		res.cookie("accessToken", newAccessToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: isProduction ? 'lax' : 'none',
 			maxAge: accessTokenLifetime * 1000,
 			path: "/",
 			domain: isProduction ? '.eggspank.cloud' : undefined
@@ -41,7 +41,7 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 		res.cookie("refreshToken", newRefreshToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: isProduction ? 'lax' : 'none',
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/",
 			domain: isProduction ? '.eggspank.cloud' : undefined
