@@ -9,20 +9,20 @@ export async function loginController(req: Request, res: Response, next: NextFun
 		const { email, password } = req.body;
 		const { user, accessToken, refreshToken } = await login(email, password);
 		
-		const isDev = process.env.NODE_ENV === "development";
+		const isProduction = process.env.NODE_ENV === 'production';
 		
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			secure: isDev ? false : true,
-			sameSite: isDev ? "none" : "strict",
+			secure: isProduction,
+			sameSite: 'lax',
 			maxAge: accessTokenLifetime * 1000,
 			path: "/"
 		});
 
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
-			secure: isDev ? false : true,
-			sameSite: isDev ? "none" : "strict",
+			secure: isProduction,
+			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/"
 		});

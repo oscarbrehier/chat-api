@@ -27,20 +27,20 @@ export async function refreshTokenController(req: Request, res: Response, next: 
 			return res.status(401).json({ message: "Invalid refresh token" });
 		};
 
-		const isDev = process.env.NODE_ENV === "development";
+		const isProduction = process.env.NODE_ENV === 'production';
 		
 		res.cookie("accessToken", newAccessToken, {
 			httpOnly: true,
-			secure: isDev ? false : true,
-			sameSite: isDev ? "none" : "strict",
+			secure: isProduction,
+			sameSite: 'lax',
 			maxAge: accessTokenLifetime * 1000,
 			path: "/"
 		});
 
 		res.cookie("refreshToken", newRefreshToken, {
 			httpOnly: true,
-			secure: isDev ? false : true,
-			sameSite: isDev ? "none" : "strict",
+			secure: isProduction,
+			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			path: "/"
 		});
