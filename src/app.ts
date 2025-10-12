@@ -13,7 +13,7 @@ const isProduction = process.env.NODE_ENV === "production";
 app.use(cors({
 	origin: isProduction
 		? [process.env.FRONTEND_URL as string]
-		: "http://localhost:5137",
+		: "http://localhost:5173",
 	credentials: true
 }));
 

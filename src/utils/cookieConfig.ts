@@ -7,7 +7,7 @@ export function cookieConfig(maxAge: number | undefined): CookieOptions {
 	return {
 		httpOnly: true,
 		secure: true,
-		sameSite: isProduction ? 'lax' : 'none',
+		sameSite: 'none',
 		maxAge: maxAge,
 		path: "/",
 		...(isProduction && { domain: '.eggspank.cloud' })
