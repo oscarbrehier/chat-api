@@ -5,16 +5,11 @@ export async function sendMessageController(req: Request, res: Response, next: N
 
 	try {
 
-		let imageUrl: string | null = null;
-		const { chatId, content, ...restBody } = req.body;
-
-		if (restBody?.imageUrl) {
-			imageUrl = restBody.imageUrl;
-		};
+		const { chatId, ...body } = req.body;
 
 		if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
-		const message = await sendMessage(chatId, req.user?.id, content, imageUrl);
+		const message = await sendMessage(chatId, req.user?.id, body?.content ?? null, body?.imageUrl ?? null);
 
 		res.status(200).json(message);
 

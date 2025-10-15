@@ -10,8 +10,6 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === "production";
 
-console.log(isProduction)
-
 const server = createServer(app);
 export const io = new Server(server,
 	{
